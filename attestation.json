@@ -1,0 +1,9 @@
+{
+  "pluginId": "neodex.quatuor",
+  "repo": "NDesumeur/neodex-plugin-quatuor",
+  "version": "1.0.0",
+  "sha256": "6db75584e62ae6b14127e172d076d056278da744a562f86ffa09065f28982c00",
+  "approvedAt": "2026-11-12T12:24:44.214Z",
+  "neobase": ">=4.0.0",
+  "signature": "k1fk1HTFpMtpQ8VSgSZWv8AoRlHB7qitdxJcWwFnYPQBvjyp7ZQ92nvn9hTLpfurKUOi/oTkCC/GB5Ko1iHSAw=="
+}
