@@ -20,7 +20,7 @@ A pixel art word game: sixteen words hide four groups of four. Find what links t
 - A group found becomes a coloured band: **yellow** for the easiest, then green, blue, and **purple** for the trickiest.
 - **Four mistakes** allowed. “One away!” when three words out of four are right. The same guess never counts twice.
 - After four mistakes, the missing groups are revealed one by one.
-- **Twenty handwritten grids**. The game always offers the next grid not solved yet.
+- **Thirty-four handwritten grids**. The game always offers the next grid not solved yet.
 
 ## Stats
 

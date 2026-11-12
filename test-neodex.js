@@ -5,7 +5,7 @@ module.exports = async ({ pj, sleep }) => {
   const key = k => pj(`document.dispatchEvent(new KeyboardEvent('keydown', {key: '${k}', bubbles: true})), 0`);
   const label = () => pj(`document.getElementById('qtCanvas').getAttribute('aria-label')`);
   const shot = async n => { if (!process.env.NEO_SHOTS) return; const d = await pj(`document.getElementById('qtCanvas').toDataURL()`); require('fs').writeFileSync(require('path').join(process.env.NEO_SHOTS, 'quatuor-' + n + '.png'), Buffer.from(d.split(',')[1], 'base64')); };
-  const src = require('fs').readFileSync(require('path').join(process.env.NEO_LOCAL || __dirname, 'index.js'), 'utf8');
+  const src = require('fs').readFileSync(require('path').join((process.env.NEO_LOCAL || '').split(';').find(d => d.endsWith('-quatuor')) || __dirname, 'index.js'), 'utf8');
   const grids = src.split('\n').filter(l => /^  \[\['/.test(l)).map(l => [...l.matchAll(/\['[^']+', \[([^\]]+)\]\]/g)].map(m => m[1].split(', ').map(w => w.slice(1, -1))));
   const read = async () => { const l = await label(), m = /grille (\d+), (\d+) groupes trouvés.*Mots : (.*)\.$/.exec(l); if (!m) throw new Error('grille illisible : « ' + l + ' »'); return {l, idx: +m[1] - 1, found: +m[2], words: m[3] ? m[3].split(', ') : []}; };
   // un clic sur la case i (mêmes mesures que le jeu : cases de 58 x 26, écart 2, grille à (3, 15) sur un dessin de 244 x 172)

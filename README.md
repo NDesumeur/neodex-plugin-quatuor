@@ -18,7 +18,7 @@ Un jeu de mots en pixel art : seize mots cachent quatre groupes de quatre. À to
 - Un groupe trouvé devient une bande de couleur : **jaune** pour le plus simple, puis vert, bleu, et **violet** pour le plus retors.
 - **Quatre erreurs** permises. « À un près ! » quand trois mots sur quatre sont bons. Une même proposition ne compte jamais deux fois.
 - Après quatre erreurs, les groupes manquants se dévoilent un par un.
-- **Vingt grilles** écrites à la main. Le jeu propose toujours la prochaine grille pas encore réussie.
+- **Trente-quatre grilles** écrites à la main. Le jeu propose toujours la prochaine grille pas encore réussie.
 
 ## Statistiques
 

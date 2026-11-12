@@ -1,9 +1,9 @@
 {
   "id": "neodex.quatuor",
   "name": "Quatuor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "NDesumeur",
-  "description": "Jeu de mots : seize mots cachent quatre groupes de quatre. Trouve ce qui les relie, des fruits rouges aux mots qui suivent « coup de » en passant par les pays cachés dans un mot. Vingt grilles écrites à la main, avec des pièges : des mots qui semblent aller dans deux groupes. Quatre erreurs permises. Grilles réussies et sans faute.",
+  "description": "Jeu de mots : seize mots cachent quatre groupes de quatre. Trouve ce qui les relie, des fruits rouges aux mots qui suivent « coup de » en passant par les pays cachés dans un mot. Trente-quatre grilles écrites à la main, avec des pièges : des mots qui semblent aller dans deux groupes. Quatre erreurs permises. Grilles réussies et sans faute.",
   "icon": "icon.png",
   "entry": "index.js",
   "view": "quatuor",
