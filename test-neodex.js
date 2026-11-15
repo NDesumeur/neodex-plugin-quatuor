@@ -27,5 +27,15 @@ module.exports = async ({ pj, sleep }) => {
     for (let k = 0; k < 4; k++) { await key('Backspace'); await pickAll(G2.map(gr => gr[k])); await key('Enter'); await sleep(400); }
     await sleep(3200); await shot('4-perdu');
   }
-  return s.l;
+  // deux des nouvelles grilles (35 à 80) à l'écran, le plein écran et la place prise
+  await pj(`window.__e = []; addEventListener('error', e => __e.push(e.message)); 0`);
+  for (const i of [46, 79]) { await pj(`document.getElementById('qtCanvas').__qt.go(${i}), 0`); await sleep(400); const r = await read(); if (r.idx !== i || r.words.length !== 16) throw new Error('grille ' + (i + 1) + ' : ' + r.l); await shot('5-grille' + (i + 1)); }
+  await pj(`document.getElementById('qtFs').click(), 0`); await sleep(700);
+  const fs = await pj(`(() => { const c = document.getElementById('qtCanvas'), r = c.getBoundingClientRect(); return document.fullscreenElement === c.parentElement && (Math.abs(r.height - innerHeight) < 3 || Math.abs(r.width - innerWidth) < 3); })()`);
+  await pj(`document.fullscreenElement && document.exitFullscreen(), 0`); await sleep(300);
+  if (!fs) throw new Error('le plein écran ne remplit pas l’écran');
+  const L = await pj(`(() => { const r = document.getElementById('qtCanvas').getBoundingClientRect(); let s = 0; for (let e = document.getElementById('qtCanvas').parentElement; e; e = e.parentElement) s += e.scrollTop; return { bottom: Math.round(r.bottom + s), h: Math.round(r.height), wh: innerHeight, ww: innerWidth, sw: document.documentElement.scrollWidth }; })()`);
+  if (L.bottom > L.wh + 1 || L.sw > L.ww + 1 || L.h < 300) throw new Error('le jeu dépasse la fenêtre ou reste petit : ' + JSON.stringify(L));
+  const errs = await pj(`window.__e.join(' | ')`); if (errs) throw new Error('erreur : ' + errs);
+  return s.l + ' · grilles 47 et 80 · plein écran · ' + L.h + ' px dans ' + L.ww + '×' + L.wh;
 };

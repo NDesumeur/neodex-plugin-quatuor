@@ -5,13 +5,15 @@ const HTML = `<div class="appWrap wide">
   <div class="gMain"><div class="gameBox"><canvas id="qtCanvas" width="244" height="172" role="img" aria-label="Quatuor"></canvas></div>
     <div class="gSide">
       <div class="sysCard"><b>RECORDS</b><div class="gStats" id="qtStats"></div></div>
-      <div class="row"><button class="btn main" id="qtNew">NOUVELLE PARTIE</button></div>
+      <div class="row"><button class="btn main" id="qtNew">NOUVELLE PARTIE</button><button class="btn" id="qtFs">PLEIN ÉCRAN</button></div>
       <div class="hint">Seize mots cachent quatre groupes de quatre : des fruits, des mots qui suivent « coup de », des pays cachés dans un mot… Choisis quatre mots qui vont ensemble et valide. Attention aux pièges : certains mots semblent aller dans deux groupes. Le jaune est le plus simple, le violet le plus retors. Quatre erreurs permises ; « À un près ! » quand trois mots sur quatre sont bons.</div>
     </div></div>
 </div>`;
 const CSS = `.gMain{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
-.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;flex:0 0 auto;position:relative}
-.gameBox canvas{height:min(72vh,640px);width:auto;aspect-ratio:244/172;image-rendering:pixelated;cursor:var(--cp,pointer);touch-action:none}
+.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;flex:1 1 360px;min-width:min(100%,320px);position:relative}
+.gameBox:fullscreen{padding:0}
+.gameBox:fullscreen canvas{width:min(100vw,calc(100vh * 244 / 172))}
+.gameBox canvas{width:min(100%,max(280px,calc((100vh - 170px) * 244 / 172)));height:auto;aspect-ratio:244/172;image-rendering:pixelated;cursor:var(--cp,pointer);touch-action:none}
 .gSide{display:flex;flex-direction:column;gap:14px;flex:1;min-width:250px;max-width:420px}
 .gSide .sysCard{display:flex;flex-direction:column}
 .gStats{display:grid;grid-template-columns:1fr auto;gap:4px 14px}
@@ -288,7 +290,7 @@ export default async function (ctx) {
   view.innerHTML = HTML;
   pxSkin(view.querySelector('.appWrap'), { title: "QUATUOR", T: {"k": "#0c0a12", "k2": "#16121e", "fill": "#221c2c", "fillOn": "#2e263a", "hl": "#3a3046", "line": "#62566e", "acc": "#b884e0", "accL": "#e8d0ff", "accS": "#7a4aa8", "accD": "#2a1440", "rivet": "#f0f0f8", "btn": "#3a3046", "btnHi": "#62566e", "btnLo": "#16121e", "btnHov": "#443852", "btnHovHi": "#82768e", "text": "#f4f0f8", "muted": "#c0b8cc", "acc2": "#7ee07a", "gold": "#ffd84a", "orange": "#ff8a3a", "red": "#ff4a3a", "green": "#7ee07a", "green2": "#2f8a3a", "bg": "#100c16", "bgDot": "#221c2c", "bgDot2": "#16121e", "spark": "#2a1440", "spark2": "#b884e0", "tile": ["................", "...:............", "................", "..........+.....", "................", "................", ".....:..........", "................", "................", ".............:..", "................", "..+.............", "................", ".........:......", "................", "................"]},
   emblem: ["............", "kkkkk..kkkkk", "kgggk..knnnk", "kgggk..knnnk", "kkkkk..kkkkk", "............", "kkkkk..kkkkk", "koook..kaaak", "koook..kaaak", "kkkkk..kkkkk", "............", "............"],
-  icons: [[/^NOUVELLE/, 'play'], [/^RECORDS/, 'crown']] });
+  icons: [[/^NOUVELLE/, 'play'], [/^RECORDS/, 'crown'], [/^PLEIN/, 'full']] });
   const $ = id => view.querySelector('#' + id) || document.getElementById(id);
   const doc = async n => { try { return await folder.read(n); } catch { return null; } };
   const games = { best: {}, ...(await doc('games')) };
@@ -358,6 +360,52 @@ const QT_P = [
   [['Organes', ['FOIE', 'POUMON', 'REIN', 'ESTOMAC']], ['Os', ['FÉMUR', 'TIBIA', 'CRÂNE', 'RADIUS']], ['Variétés de pommes', ['GALA', 'REINETTE', 'GOLDEN', 'GRANNY']], ['Mots doux', ['CHÉRI', 'CŒUR', 'CHOU', 'LAPIN']]],
   [['Rongeurs', ['SOURIS', 'CASTOR', 'HAMSTER', 'ÉCUREUIL']], ['Petits des animaux', ['PORCELET', 'AGNEAU', 'ÂNON', 'POUSSIN']], ['Signes chinois', ['RAT', 'BUFFLE', 'DRAGON', 'SINGE']], ['Marques d’ordinateurs', ['APPLE', 'DELL', 'ASUS', 'ACER']]],
   [['Pièces de la maison', ['GRENIER', 'CAVE', 'SALON', 'CUISINE']], ['Ustensiles de cuisine', ['FOUET', 'LOUCHE', 'PASSOIRE', 'SPATULE']], ['Chevaux', ['PONEY', 'ÉTALON', 'JUMENT', 'POULAIN']], ['… de bataille', ['CHEVAL', 'CHAMP', 'PLAN', 'CRI']]],
+  [['Mois', ['JANVIER', 'AVRIL', 'JUILLET', 'OCTOBRE']], ['Jours de la semaine', ['LUNDI', 'MARDI', 'JEUDI', 'SAMEDI']], ['Dieux romains', ['MARS', 'JUNON', 'VULCAIN', 'DIANE']], ['Jour de…', ['FÊTE', 'PAIE', 'CHANCE', 'GLOIRE']]],
+  [['Couleurs de l’arc-en-ciel', ['ROUGE', 'INDIGO', 'VERT', 'ORANGE']], ['Roches', ['GRANIT', 'MARBRE', 'ARDOISE', 'SILEX']], ['Peintres espagnols', ['GOYA', 'PICASSO', 'DALÍ', 'MIRÓ']], ['Bleu…', ['MARINE', 'CIEL', 'ROI', 'NUIT']]],
+  [['Arbres fruitiers', ['POMMIER', 'CERISIER', 'PRUNIER', 'NOYER']], ['Conifères', ['ÉPICÉA', 'PIN', 'MÉLÈZE', 'IF']], ['Compositeurs', ['BACH', 'MOZART', 'CHOPIN', 'RAVEL']], ['… de Noël', ['SAPIN', 'PÈRE', 'BÛCHE', 'MARCHÉ']]],
+  [['Sports nautiques', ['AVIRON', 'SURF', 'CANOË', 'KAYAK']], ['Sports de combat', ['BOXE', 'LUTTE', 'JUDO', 'SUMO']], ['Fromages italiens', ['RICOTTA', 'PECORINO', 'BURRATA', 'FONTINA']], ['Planche à…', ['VOILE', 'PAIN', 'REPASSER', 'DESSIN']]],
+  [['Fleurs', ['ROSE', 'JACINTHE', 'DAHLIA', 'IRIS']], ['Cépages', ['MERLOT', 'SYRAH', 'GAMAY', 'MALBEC']], ['Fruits secs', ['NOIX', 'AMANDE', 'NOISETTE', 'PISTACHE']], ['Couleurs qui sont des fleurs', ['MAUVE', 'PERVENCHE', 'JONQUILLE', 'FUCHSIA']]],
+  [['Animaux de la forêt', ['CERF', 'SANGLIER', 'BLAIREAU', 'RENARD']], ['Reptiles', ['LÉZARD', 'IGUANE', 'GECKO', 'CAÏMAN']], ['Marques de sport', ['NIKE', 'ADIDAS', 'PUMA', 'REEBOK']], ['Commence par un animal', ['COQUILLE', 'LOUPE', 'RATURE', 'CERFEUIL']]],
+  [['Instruments à clavier', ['PIANO', 'ORGUE', 'CLAVECIN', 'ACCORDÉON']], ['Notes de musique', ['DO', 'RÉ', 'MI', 'SOL']], ['Cafés', ['EXPRESSO', 'LATTE', 'MOKA', 'RISTRETTO']], ['Piano…', ['BAR', 'FORTE', 'DROIT', 'QUEUE']]],
+  [['Pays nordiques', ['NORVÈGE', 'SUÈDE', 'FINLANDE', 'ISLANDE']], ['Leurs capitales', ['OSLO', 'HELSINKI', 'STOCKHOLM', 'REYKJAVIK']], ['Poissons des mers froides', ['MORUE', 'HARENG', 'SAUMON', 'FLÉTAN']], ['Le Père Noël', ['TRAÎNEAU', 'RENNE', 'LUTIN', 'HOTTE']]],
+  [['Langues romanes', ['ITALIEN', 'ESPAGNOL', 'ROUMAIN', 'PORTUGAIS']], ['Habitants de villes', ['PARISIEN', 'LYONNAIS', 'NIÇOIS', 'LILLOIS']], ['Viennoiseries', ['CROISSANT', 'BRIOCHE', 'CHAUSSON', 'PALMIER']], ['… à la française', ['JARDIN', 'CUISINE', 'FENÊTRE', 'PLAFOND']]],
+  [['Moyens de transport', ['AVION', 'BUS', 'MÉTRO', 'TRAM']], ['Parties d’un avion', ['AILE', 'HÉLICE', 'COCKPIT', 'DÉRIVE']], ['Ponctuation', ['POINT', 'VIRGULE', 'TIRET', 'GUILLEMET']], ['Train de…', ['VIE', 'NUIT', 'PNEUS', 'SÉNATEUR']]],
+  [['Amis de Mickey', ['MINNIE', 'DINGO', 'PLUTO', 'DONALD']], ['Nains de Blanche-Neige', ['PROF', 'JOYEUX', 'SIMPLET', 'GRINCHEUX']], ['Dieux des morts', ['HADÈS', 'PLUTON', 'ANUBIS', 'OSIRIS']], ['Canards de Disney', ['RIRI', 'FIFI', 'LOULOU', 'PICSOU']]],
+  [['Tissus', ['LAINE', 'COTON', 'LIN', 'VELOURS']], ['Céréales', ['BLÉ', 'ORGE', 'AVOINE', 'SEIGLE']], ['Pains du monde', ['PITA', 'NAAN', 'BAGEL', 'BRETZEL']], ['Ver…', ['SOIE', 'TERRE', 'LUISANT', 'SOLITAIRE']]],
+  [['Animaux nocturnes', ['HIBOU', 'CHOUETTE', 'HÉRISSON', 'LUCIOLE']], ['Dans le ciel la nuit', ['COMÈTE', 'GALAXIE', 'NÉBULEUSE', 'ÉTOILE']], ['Dormir comme…', ['LOIR', 'BÉBÉ', 'SOUCHE', 'MARMOTTE']], ['Pleine…', ['LUNE', 'FORME', 'MER', 'PAGE']]],
+  [['Monuments du monde', ['COLISÉE', 'ALHAMBRA', 'KREMLIN', 'PARTHÉNON']], ['Villes d’Espagne', ['SÉVILLE', 'TOLÈDE', 'VALENCE', 'BILBAO']], ['Armes', ['FUSIL', 'CANON', 'GRENADE', 'ARC']], ['Fruits à noyau', ['CERISE', 'ABRICOT', 'PRUNE', 'OLIVE']]],
+  [['Bijoux', ['BAGUE', 'COLLIER', 'BRACELET', 'PENDENTIF']], ['Cuit à la…', ['BROCHE', 'POÊLE', 'VAPEUR', 'PLANCHA']], ['Parfums de glace', ['VANILLE', 'PISTACHE', 'FRAISE', 'CHOCOLAT']], ['Pierre…', ['PRÉCIEUSE', 'TOMBALE', 'PONCE', 'ANGULAIRE']]],
+  [['Oiseaux marins', ['MOUETTE', 'GOÉLAND', 'MACAREUX', 'ALBATROS']], ['Rapaces', ['AIGLE', 'FAUCON', 'BUSE', 'VAUTOUR']], ['Avions de chasse', ['RAFALE', 'MIRAGE', 'TYPHOON', 'HARRIER']], ['Tête de…', ['MULE', 'TURC', 'LINOTTE', 'PONT']]],
+  [['La maison', ['TOIT', 'MUR', 'FENÊTRE', 'CHEMINÉE']], ['Parties du corps', ['BRAS', 'PIED', 'DOS', 'JAMBE']], ['Parties d’un livre', ['PAGE', 'CHAPITRE', 'RELIURE', 'SOMMAIRE']], ['Porte-…', ['MONNAIE', 'CLÉS', 'PAROLE', 'BAGAGES']]],
+  [['Volcans', ['ETNA', 'VÉSUVE', 'FUJI', 'STROMBOLI']], ['Sommets', ['EVEREST', 'CERVIN', 'ANNAPURNA', 'ACONCAGUA']], ['Déserts', ['SAHARA', 'GOBI', 'ATACAMA', 'KALAHARI']], ['Mont…', ['BLANC', 'VENTOUX', 'AIGOUAL', 'DORE']]],
+  [['Matériaux', ['BOIS', 'CARTON', 'ACIER', 'PLASTIQUE']], ['Récipients', ['BOL', 'TASSE', 'CARAFE', 'GOBELET']], ['Ça se lève', ['RIDEAU', 'SOLEIL', 'PÂTE', 'VERRE']], ['Feuille de…', ['SALADE', 'ROUTE', 'CHOU', 'PAIE']]],
+  [['Couturiers', ['DIOR', 'CHANEL', 'GIVENCHY', 'CARDIN']], ['Fleuves d’Afrique', ['NIL', 'CONGO', 'NIGER', 'ZAMBÈZE']], ['Pays d’Asie', ['JAPON', 'LAOS', 'NÉPAL', 'INDE']], ['Sac à…', ['DOS', 'MAIN', 'MALICES', 'PUCES']]],
+  [['Chez Tintin', ['MILOU', 'HADDOCK', 'DUPONT', 'NESTOR']], ['Chez Astérix', ['OBÉLIX', 'IDÉFIX', 'PANORAMIX', 'FALBALA']], ['Chiens célèbres', ['SNOOPY', 'SCOOBY', 'LASSIE', 'BELLE']], ['Huiles', ['OLIVE', 'COLZA', 'TOURNESOL', 'ARACHIDE']]],
+  [['Unités de mesure', ['MÈTRE', 'LITRE', 'GRAMME', 'KELVIN']], ['Formes de poèmes', ['SONNET', 'ODE', 'HAÏKU', 'BALLADE']], ['Le château fort', ['DONJON', 'DOUVES', 'REMPART', 'TOURELLE']], ['Seconde…', ['MAIN', 'CHANCE', 'CLASSE', 'NATURE']]],
+  [['Cours d’eau', ['RUISSEAU', 'TORRENT', 'FLEUVE', 'RIVIÈRE']], ['Plats français', ['CASSOULET', 'POTÉE', 'GRATIN', 'FONDUE']], ['Animaux marins', ['MÉDUSE', 'CRABE', 'HOMARD', 'POULPE']], ['Pied de…', ['BICHE', 'POULE', 'NEZ', 'GUERRE']]],
+  [['Héros grecs', ['ULYSSE', 'HERCULE', 'THÉSÉE', 'PERSÉE']], ['Monstres grecs', ['CYCLOPE', 'MINOTAURE', 'HYDRE', 'CHIMÈRE']], ['Lunes du système solaire', ['EUROPE', 'TITAN', 'IO', 'PHOBOS']], ['Continents', ['ASIE', 'AFRIQUE', 'AMÉRIQUE', 'OCÉANIE']]],
+  [['Produits laitiers', ['BEURRE', 'CRÈME', 'YAOURT', 'KÉFIR']], ['Fromages', ['REBLOCHON', 'MUNSTER', 'MORBIER', 'BEAUFORT']], ['Races de vaches', ['NORMANDE', 'LIMOUSINE', 'HOLSTEIN', 'SALERS']], ['Lait de…', ['COCO', 'CHÈVRE', 'POULE', 'TOILETTE']]],
+  [['La guitare', ['MANCHE', 'CORDE', 'CHEVALET', 'FRETTE']], ['La chemise', ['COL', 'POCHE', 'POIGNET', 'BOUTON']], ['Mer…', ['BALTIQUE', 'ÉGÉE', 'NOIRE', 'ROUGE']], ['… d’amour', ['LETTRE', 'CHAGRIN', 'FOU', 'NID']]],
+  [['Fournitures de bureau', ['STYLO', 'AGRAFEUSE', 'GOMME', 'CLASSEUR']], ['Jeux de cour d’école', ['MARELLE', 'BILLES', 'ÉLASTIQUE', 'CORDE']], ['Héros de jeux vidéo', ['MARIO', 'SONIC', 'LINK', 'KIRBY']], ['… d’or', ['RÈGLE', 'BALLON', 'PALME', 'LINGOT']]],
+  [['Fêtes', ['NOËL', 'PÂQUES', 'TOUSSAINT', 'CARNAVAL']], ['Œuf…', ['BROUILLÉ', 'MOLLET', 'COQUE', 'POCHÉ']], ['Pluriel en « -aux »', ['TRAVAIL', 'CORAIL', 'ÉMAIL', 'VITRAIL']], ['Chocolat…', ['NOIR', 'BLANC', 'CHAUD', 'PRALINÉ']]],
+  [['Écrivains français', ['HUGO', 'ZOLA', 'BALZAC', 'PROUST']], ['Philosophes', ['PLATON', 'KANT', 'DESCARTES', 'SARTRE']], ['Unités de physique', ['WATT', 'VOLT', 'NEWTON', 'PASCAL']], ['Prix', ['GONCOURT', 'NOBEL', 'RENAUDOT', 'FEMINA']]],
+  [['Fruits d’automne', ['COING', 'CHÂTAIGNE', 'FIGUE', 'RAISIN']], ['Champignons', ['CÈPE', 'GIROLLE', 'MORILLE', 'TRUFFE']], ['Courges', ['POTIRON', 'BUTTERNUT', 'COURGETTE', 'PÂTISSON']], ['Faire le…', ['PONT', 'MUR', 'PLEIN', 'POIRIER']]],
+  [['Athlétisme', ['JAVELOT', 'MARTEAU', 'HAIES', 'RELAIS']], ['Poissons d’eau douce', ['TRUITE', 'BROCHET', 'CARPE', 'PERCHE']], ['Pour écouter de la musique', ['VINYLE', 'CASSETTE', 'CD', 'DISQUE']], ['Outils', ['SCIE', 'RABOT', 'ÉTAU', 'MASSE']]],
+  [['Tailles de vêtements', ['S', 'M', 'XS', 'XXS']], ['Chiffres romains', ['I', 'V', 'C', 'D']], ['Groupes sanguins', ['A', 'B', 'AB', 'O']], ['Vitamines', ['E', 'K', 'B12', 'D3']]],
+  [['Animaux à carapace', ['TORTUE', 'TATOU', 'HOMARD', 'CRABE']], ['Bateaux', ['VOILIER', 'PÉNICHE', 'YACHT', 'PAQUEBOT']], ['Pour naviguer', ['BOUSSOLE', 'SEXTANT', 'GPS', 'ASTROLABE']], ['Peintres de la Renaissance', ['RAPHAËL', 'TITIEN', 'BELLINI', 'VINCI']]],
+  [['À la plage', ['SABLE', 'SERVIETTE', 'PARASOL', 'SEAU']], ['Coquillages', ['MOULE', 'HUÎTRE', 'BIGORNEAU', 'PALOURDE']], ['Biscuits', ['SABLÉ', 'SPÉCULOOS', 'MACARON', 'BOUDOIR']], ['Moule à…', ['GAUFRE', 'TARTE', 'GÂTEAU', 'MANQUÉ']]],
+  [['Rois de France', ['CLOVIS', 'PHILIPPE', 'DAGOBERT', 'LOUIS']], ['La Révolution', ['BASTILLE', 'TERREUR', 'JACOBIN', 'MARAT']], ['Saint-…', ['TROPEZ', 'MALO', 'ÉTIENNE', 'DENIS']], ['Napoléon', ['WATERLOO', 'ELBE', 'JOSÉPHINE', 'EMPIRE']]],
+  [['Couleurs de cheveux', ['BLOND', 'BRUN', 'CHÂTAIN', 'AUBURN']], ['Sauces', ['BÉCHAMEL', 'ROUX', 'AÏOLI', 'PESTO']], ['Pommes de terre', ['FRITES', 'PURÉE', 'CHIPS', 'RÖSTI']], ['Le Petit…', ['POUCET', 'PRINCE', 'NICOLAS', 'ROBERT']]],
+  [['Papillons', ['MACHAON', 'PAON', 'MONARQUE', 'AMIRAL']], ['Chefs d’État', ['PRÉSIDENT', 'ROI', 'EMPEREUR', 'SULTAN']], ['Échecs', ['ROQUE', 'MAT', 'PAT', 'GAMBIT']], ['Tour de…', ['FRANCE', 'MAGIE', 'GARDE', 'BABEL']]],
+  [['Félins', ['LION', 'TIGRE', 'LYNX', 'GUÉPARD']], ['Marques de voitures', ['JAGUAR', 'PORSCHE', 'FERRARI', 'TOYOTA']], ['Rugby', ['MÊLÉE', 'ESSAI', 'TOUCHE', 'PILIER']], ['Prendre la…', ['PORTE', 'MOUCHE', 'FUITE', 'TANGENTE']]],
+  [['Herbes aromatiques', ['BASILIC', 'PERSIL', 'THYM', 'MENTHE']], ['Boissons chaudes', ['THÉ', 'CAFÉ', 'TISANE', 'GROG']], ['Cocktails', ['MOJITO', 'SPRITZ', 'DAIQUIRI', 'PUNCH']], ['Se prononce comme « vert »', ['VERRE', 'VERS', 'VER', 'VAIR']]],
+  [['Sciences', ['PHYSIQUE', 'CHIMIE', 'BIOLOGIE', 'GÉOLOGIE']], ['Éléments chimiques', ['HÉLIUM', 'NÉON', 'CARBONE', 'SODIUM']], ['Au laboratoire', ['PIPETTE', 'BÉCHER', 'FIOLE', 'BURETTE']], ['Bulle de…', ['SAVON', 'CHAMPAGNE', 'BD', 'AIR']]],
+  [['Oiseaux', ['ROSSIGNOL', 'FAUVETTE', 'ALOUETTE', 'MOINEAU']], ['Religieux', ['MOINE', 'ABBÉ', 'CURÉ', 'ÉVÊQUE']], ['Scientifiques français', ['CURIE', 'PASTEUR', 'AMPÈRE', 'LAVOISIER']], ['Petit…', ['DÉJEUNER', 'POIS', 'FOUR', 'LAIT']]],
+  [['Les pirates', ['PERROQUET', 'TRÉSOR', 'CORSAIRE', 'ABORDAGE']], ['Îles', ['TAHITI', 'CUBA', 'BALI', 'SUMATRA']], ['Danses', ['JAVA', 'TANGO', 'SAMBA', 'FOXTROT']], ['Langages informatiques', ['PYTHON', 'RUBY', 'RUST', 'SWIFT']]],
+  [['Tarte…', ['TATIN', 'FLAMBÉE', 'NORMANDE', 'FINE']], ['Régions de France', ['BRETAGNE', 'ALSACE', 'NORMANDIE', 'CORSE']], ['Crêpe…', ['SUZETTE', 'DENTELLE', 'GEORGETTE', 'PARTY']], ['Ménage', ['BALAI', 'ÉPONGE', 'PLUMEAU', 'SEAU']]],
+  [['Robes de cheval', ['ALEZAN', 'BAI', 'PIE', 'GRIS']], ['Oiseaux des jardins', ['MERLE', 'GRIVE', 'ÉTOURNEAU', 'GEAI']], ['Allures du cheval', ['TROT', 'GALOP', 'PAS', 'AMBLE']], ['Casse-…', ['TÊTE', 'NOIX', 'COU', 'CROÛTE']]],
+  [['Pays d’Europe de l’Est', ['POLOGNE', 'HONGRIE', 'ROUMANIE', 'BULGARIE']], ['Capitales d’Europe de l’Est', ['VARSOVIE', 'BUDAPEST', 'PRAGUE', 'SOFIA']], ['Plats d’Europe de l’Est', ['GOULASCH', 'BORTSCH', 'PIEROGI', 'BLINI']], ['Fil de…', ['FER', 'SOIE', 'PÊCHE', 'ARIANE']]],
+  [['Dieux égyptiens', ['RÂ', 'ANUBIS', 'OSIRIS', 'ISIS']], ['L’Égypte ancienne', ['NIL', 'SPHINX', 'PHARAON', 'MOMIE']], ['Souverains d’Égypte', ['RAMSÈS', 'KHÉOPS', 'AKHENATON', 'CLÉOPÂTRE']], ['Œil de…', ['BŒUF', 'PERDRIX', 'CHAT', 'HORUS']]],
 ];
 const qts = gstore('quatuor', {next: 0, solved: [], perfect: 0, games: 0});
 let qt = null, qtac = null, qtMute = false;
@@ -478,7 +526,9 @@ document.addEventListener('keydown', e => {
   cv.onpointerleave = () => { if (qt) qt.hover = null; };
   cv.onpointerdown = e => { e.preventDefault(); if (!qt) return; if (qt.mode === 'over') { if (qt.over > 60 && !qt.tiles.length) qtNew(); return; } const h = hit(at(e)); if (typeof h === 'number') qtToggle(h); else if (h) qtAct(h); }; }
 $('qtNew').onclick = () => { qtNew(qt && qt.mode !== 'over' ? qt.idx : qts.next); $('qtNew').blur(); };
-{  // vérification : 20 grilles de 16 mots tous différents qui tiennent dans leur case, et une partie jouée (une erreur à un près, un groupe trouvé, une grille réussie)
+$('qtCanvas').__qt = {go: i => qtNew(i)};
+$('qtFs').onclick = () => { $('qtFs').blur(); try { document.fullscreenElement ? document.exitFullscreen() : $('qtCanvas').parentElement.requestFullscreen?.().catch(() => {}); } catch {} };
+{  // vérification : 80 grilles de 16 mots tous différents qui tiennent dans leur case, et une partie jouée (une erreur à un près, un groupe trouvé, une grille réussie)
   const bad = [];
   QT_P.forEach((p, i) => { const ws = p.flatMap(gr => gr[1]); if (p.length !== 4 || ws.length !== 16 || new Set(ws).size !== 16) bad.push(i + 1 + ' : mots');
     for (const w of ws) if (PXK.layout(w).w > QT.TW - 4) bad.push(i + 1 + ' : ' + w + ' trop long');
@@ -489,6 +539,7 @@ $('qtNew').onclick = () => { qtNew(qt && qt.mode !== 'over' ? qt.idx : qts.next)
   if (qt.mist !== 1 || qt.msg !== 'À un près !') bad.push('à un près');
   for (let k = 0; k < 4; k++) { qt.sel.clear(); for (const w of pick(k, 4)) qtToggle(qt.tiles.findIndex(t => t.w === w)); qtCheck(); }
   if (qt.mode !== 'over' || !qt.won || qt.found.length !== 4) bad.push('grille réussie');
+  if (QT_P.length !== 80) bad.push(QT_P.length + ' grilles');
   console.assert(!bad.length, 'quatuor', bad);
   Object.assign(qts, JSON.parse(keepS)); if (keepB === undefined) delete games.best.quatuor; else games.best.quatuor = keepB; qt = keep; qtMute = false;
 }
