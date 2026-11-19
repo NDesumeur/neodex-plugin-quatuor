@@ -580,7 +580,6 @@
  "Races de chats": "Races de chats",
  "Races de chiens": "Races de chiens",
  "Raté": "Wrong",
- "Record.": "Best.",
  "Repas": "Repas",
  "Requin-…": "Requin-…",
  "Rongeurs": "Rongeurs",
@@ -1559,5 +1558,6 @@
  "Œil de…": "Œil de…",
  "BŒUF": "BŒUF",
  "PERDRIX": "PERDRIX",
- "HORUS": "HORUS"
+ "HORUS": "HORUS",
+ "Rien n'est synchronisé : tes records restent sur cet appareil.": "Nothing is synced: your records stay on this device."
 }
