@@ -4,6 +4,10 @@ Un jeu de mots en pixel art : seize mots cachent quatre groupes de quatre. À to
 
 *English version: [README.en.md](README.en.md)*
 
+## Grille du jour et grilles surprises (nouveau en 1.3.0)
+
+**Grille du jour** : la même grille pour tout le monde, nouvelle chaque jour, avec sa série de jours réussis d'affilée. **Grille surprise** : une grille neuve à chaque clic, sans fin. Ces grilles piochent un groupe de chaque couleur (jaune le plus simple, violet le plus retors) dans une banque de près de 400 groupes : ceux des 80 grilles et 75 nouveaux (fromages, volcans, Molière, « avoir la frite », palindromes, mots qui cachent un nombre…). Deux groupes qui se ressemblent ne tombent jamais ensemble.
+
 ## Commandes
 
 - **Clic** sur un mot, ou **flèches** puis **Espace** : choisir ou retirer un mot.

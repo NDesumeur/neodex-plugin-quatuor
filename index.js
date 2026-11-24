@@ -6,6 +6,7 @@ const HTML = `<div class="appWrap wide">
     <div class="gSide">
       <div class="sysCard"><b>RECORDS</b><div class="gStats" id="qtStats"></div></div>
       <div class="row"><button class="btn main" id="qtNew">NOUVELLE PARTIE</button><button class="btn" id="qtFs">PLEIN ÉCRAN</button></div>
+      <div class="row"><button class="btn" id="qtDay">GRILLE DU JOUR</button><button class="btn" id="qtMix">GRILLE SURPRISE</button></div>
       <div class="hint">Seize mots cachent quatre groupes de quatre : des fruits, des mots qui suivent « coup de », des pays cachés dans un mot… Choisis quatre mots qui vont ensemble et valide. Attention aux pièges : certains mots semblent aller dans deux groupes. Le jaune est le plus simple, le violet le plus retors. Quatre erreurs permises ; « À un près ! » quand trois mots sur quatre sont bons.</div>
     </div></div>
 </div>`;
@@ -407,15 +408,57 @@ const QT_P = [
   [['Pays d’Europe de l’Est', ['POLOGNE', 'HONGRIE', 'ROUMANIE', 'BULGARIE']], ['Capitales d’Europe de l’Est', ['VARSOVIE', 'BUDAPEST', 'PRAGUE', 'SOFIA']], ['Plats d’Europe de l’Est', ['GOULASCH', 'BORTSCH', 'PIEROGI', 'BLINI']], ['Fil de…', ['FER', 'SOIE', 'PÊCHE', 'ARIANE']]],
   [['Dieux égyptiens', ['RÂ', 'ANUBIS', 'OSIRIS', 'ISIS']], ['L’Égypte ancienne', ['NIL', 'SPHINX', 'PHARAON', 'MOMIE']], ['Souverains d’Égypte', ['RAMSÈS', 'KHÉOPS', 'AKHENATON', 'CLÉOPÂTRE']], ['Œil de…', ['BŒUF', 'PERDRIX', 'CHAT', 'HORUS']]],
 ];
-const qts = gstore('quatuor', {next: 0, solved: [], perfect: 0, games: 0});
+// des groupes en plus, rangés par difficulté (0 jaune, 1 vert, 2 bleu, 3 violet) : avec ceux des grilles, ils font les grilles du jour et les grilles surprises
+const QT_X = [
+  [0, 'Fruits rouges', ['FRAISE', 'FRAMBOISE', 'CERISE', 'GROSEILLE']], [0, 'Agrumes', ['ORANGE', 'CITRON', 'MANDARINE', 'YUZU']], [0, 'Instruments à cordes', ['VIOLON', 'GUITARE', 'HARPE', 'BANJO']],
+  [0, 'Jours de la semaine', ['LUNDI', 'MARDI', 'JEUDI', 'SAMEDI']], [0, 'Métiers de la santé', ['MÉDECIN', 'DENTISTE', 'INFIRMIER', 'KINÉ']], [0, 'Félins', ['TIGRE', 'GUÉPARD', 'LYNX', 'PANTHÈRE']],
+  [0, 'Fromages de France', ['BRIE', 'COMTÉ', 'ROQUEFORT', 'CANTAL']], [0, 'Dans la caisse à outils', ['MARTEAU', 'SCIE', 'TOURNEVIS', 'PINCE']], [0, 'Vêtements', ['CHEMISE', 'PANTALON', 'JUPE', 'GILET']],
+  [0, 'Meubles', ['TABLE', 'CHAISE', 'ARMOIRE', 'COMMODE']], [0, 'Petites bêtes', ['ABEILLE', 'FOURMI', 'GUÊPE', 'PAPILLON']], [0, 'Boissons chaudes', ['CAFÉ', 'THÉ', 'CHOCOLAT', 'TISANE']],
+  [0, 'Sports d’équipe', ['FOOTBALL', 'RUGBY', 'HANDBALL', 'VOLLEY']], [0, 'Poissons', ['SAUMON', 'THON', 'TRUITE', 'SARDINE']], [0, 'Fleurs', ['TULIPE', 'LYS', 'ORCHIDÉE', 'JONQUILLE']],
+  [0, 'Pièces de la maison', ['CUISINE', 'SALON', 'CHAMBRE', 'GRENIER']], [0, 'Moyens de transport', ['TRAIN', 'AVION', 'BATEAU', 'VÉLO']], [0, 'Saisons', ['PRINTEMPS', 'ÉTÉ', 'AUTOMNE', 'HIVER']],
+  [0, 'Desserts', ['ÉCLAIR', 'MACARON', 'TIRAMISU', 'FLAN']], [0, 'Couleurs de l’arc-en-ciel', ['ROUGE', 'INDIGO', 'VIOLET', 'JAUNE']],
+  [1, 'Capitales d’Asie', ['TOKYO', 'SÉOUL', 'PÉKIN', 'HANOÏ']], [1, 'Fleuves de France', ['LOIRE', 'SEINE', 'RHÔNE', 'GARONNE']], [1, 'Mers', ['BALTIQUE', 'CASPIENNE', 'NOIRE', 'ÉGÉE']],
+  [1, 'Super-héros', ['BATMAN', 'SUPERMAN', 'HULK', 'THOR']], [1, 'Pièces d’échecs', ['ROI', 'DAME', 'FOU', 'CAVALIER']], [1, 'Os du corps', ['FÉMUR', 'TIBIA', 'RADIUS', 'HUMÉRUS']],
+  [1, 'Métaux', ['CUIVRE', 'ZINC', 'PLOMB', 'ÉTAIN']], [1, 'Pierres précieuses', ['RUBIS', 'SAPHIR', 'ÉMERAUDE', 'DIAMANT']], [1, 'Unités de mesure', ['MÈTRE', 'LITRE', 'GRAMME', 'SECONDE']],
+  [1, 'Formes', ['CERCLE', 'TRIANGLE', 'LOSANGE', 'OVALE']], [1, 'Langues', ['ESPAGNOL', 'ALLEMAND', 'ITALIEN', 'ARABE']], [1, 'Volcans', ['ETNA', 'VÉSUVE', 'FUJI', 'STROMBOLI']],
+  [1, 'Mammifères marins', ['DAUPHIN', 'BALEINE', 'PHOQUE', 'ORQUE']], [1, 'Épices', ['CANNELLE', 'CUMIN', 'PAPRIKA', 'SAFRAN']], [1, 'Herbes aromatiques', ['BASILIC', 'THYM', 'PERSIL', 'ROMARIN']],
+  [1, 'Constellations', ['ORION', 'CASSIOPÉE', 'PÉGASE', 'ANDROMÈDE']], [1, 'Organes', ['FOIE', 'POUMON', 'REIN', 'RATE']], [1, 'Notes de musique', ['DO', 'RÉ', 'MI', 'LA']],
+  [1, 'Châteaux de la Loire', ['CHAMBORD', 'BLOIS', 'AMBOISE', 'CHINON']], [1, 'Départements d’outre-mer', ['GUADELOUPE', 'MAYOTTE', 'GUYANE', 'RÉUNION']],
+  [2, 'Termes de golf', ['BIRDIE', 'EAGLE', 'BOGEY', 'PAR']], [2, 'Personnages de Molière', ['HARPAGON', 'TARTUFFE', 'ALCESTE', 'JOURDAIN']], [2, 'Les Trois Mousquetaires', ['ATHOS', 'PORTHOS', 'ARAMIS', 'MILADY']],
+  [2, 'Dieux grecs', ['ZEUS', 'HÉRA', 'ATHÉNA', 'APOLLON']], [2, 'Avoir le…', ['CAFARD', 'TRAC', 'BOURDON', 'MORAL']], [2, 'Jeux de société', ['MONOPOLY', 'SCRABBLE', 'CLUEDO', 'DIXIT']],
+  [2, 'Mois du calendrier républicain', ['BRUMAIRE', 'THERMIDOR', 'VENTÔSE', 'FLORÉAL']], [2, 'Planètes naines', ['PLUTON', 'CÉRÈS', 'ÉRIS', 'HAUMEA']], [2, 'Lunes de Jupiter', ['IO', 'EUROPE', 'GANYMÈDE', 'CALLISTO']],
+  [2, 'Nuages', ['CIRRUS', 'CUMULUS', 'STRATUS', 'NIMBUS']], [2, 'Vents', ['MISTRAL', 'SIROCCO', 'FŒHN', 'ZÉPHYR']], [2, 'Récompenses', ['NOBEL', 'GONCOURT', 'CÉSAR', 'OSCAR']],
+  [2, 'Lettres grecques', ['ALPHA', 'DELTA', 'SIGMA', 'OMÉGA']], [2, 'Porte-…', ['MONNAIE', 'CLÉS', 'PAROLE', 'AVIONS']], [2, 'Être dans le…', ['PÉTRIN', 'COLTAR', 'VENT', 'BAIN']],
+  [2, 'Bandes dessinées belges', ['TINTIN', 'SPIROU', 'GASTON', 'BLAKE']], [2, 'Pas de…', ['DEUX', 'PORTE', 'LOUP', 'CALAIS']],
+  [3, 'Cachent un animal', ['CHÂTEAU', 'RATURE', 'COQUILLE', 'LOUPE']], [3, 'Cachent un nombre', ['HUÎTRE', 'CENTRE', 'BRONZE', 'SEPTIQUE']], [3, 'Commencent par une note', ['DOMINO', 'SOLEIL', 'FARINE', 'MIROIR']],
+  [3, 'Palindromes', ['RADAR', 'KAYAK', 'RESSASSER', 'SOLOS']], [3, '… de Paris', ['JAMBON', 'COMTE', 'MYSTÈRES', 'BOURSE']], [3, 'Œuf…', ['MOLLET', 'COCOTTE', 'BROUILLÉ', 'DUR']],
+  [3, 'Pied de…', ['BICHE', 'POULE', 'NEZ', 'GUERRE']], [3, 'Tête de…', ['TURC', 'LINOTTE', 'PIOCHE', 'GONDOLE']], [3, '… blanche', ['NUIT', 'CARTE', 'ARME', 'MAISON']],
+  [3, '… noire', ['BÊTE', 'MARÉE', 'LISTE', 'CAISSE']], [3, 'Rouge comme…', ['TOMATE', 'ÉCREVISSE', 'HOMARD', 'BETTERAVE']], [3, 'Prendre la…', ['MOUCHE', 'TANGENTE', 'POUDRE', 'CLÉ']],
+  [3, 'Avoir la… (être en forme)', ['FRITE', 'PÊCHE', 'BANANE', 'PATATE']], [3, 'Faire la…', ['BISE', 'MOUE', 'PLANCHE', 'TAMBOUILLE']], [3, 'Pluriel en X', ['BIJOU', 'CAILLOU', 'CHEVEU', 'GENOU']],
+  [3, 'Un métal caché', ['FERME', 'ORANGER', 'ARGENTIN', 'PLOMBIER']]];
+// une grille faite de quatre groupes, un de chaque couleur, sans mot en double ni deux thèmes trop proches (deux groupes d'oiseaux)
+// shortcut: le mélange ne voit pas un mot qui irait aussi dans un autre thème sans y être écrit ; s'il gêne, retirer l'un des deux groupes de la banque
+const QT_BANK = [0, 1, 2, 3].map(lv => [...QT_P.map(p => p[lv]), ...QT_X.filter(x => x[0] === lv).map(x => [x[1], x[2]])]);
+const qtTok = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z]+/).filter(w => w.length >= 5 && !/^(comme|avoir|faire|cachent|finit|finissent|commencent|grecs?|france)$/.test(w));
+function qtMix(seed) {
+  const r = seeded(seed);
+  for (let n = 0; n < 500; n++) {
+    const P = QT_BANK.map(b => b[Math.floor(r() * b.length)]), words = P.flatMap(p => p[1]), toks = P.flatMap(p => qtTok(p[0]));
+    if (new Set(words).size === 16 && new Set(toks).size === toks.length) return P;
+  }
+  return QT_P[seed % QT_P.length];
+}
+const qtToday = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const qtDaySeed = day => [...'quatuor-' + day].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0, 2166136261);
+const qts = gstore('quatuor', {next: 0, solved: [], perfect: 0, games: 0}); qts.day ??= {played: 0, won: 0, streak: 0, max: 0, last: '', res: ''}; qts.mix ??= {played: 0, won: 0};
 let qt = null, qtac = null, qtMute = false;
 function qtBeep(f, d, type = 'square', slide = 0, vol = .04) { if (qtMute) return; try { qtac ??= new AudioContext(); const o = qtac.createOscillator(), g = qtac.createGain(), t = qtac.currentTime; o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + d); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(qtac.destination); o.start(t); o.stop(t + d); } catch {} }
 function qtShuffle(a, r) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 // une nouvelle partie garde le même objet : la boucle du jeu (gameLoop) continue de tourner dessus
 const renew = (old, o) => { if (!old) return o; for (const k of Object.keys(old)) if (k !== 'raf') delete old[k]; return Object.assign(old, o); };
-function qtNew(idx = qts.next) {
-  const g = qt?.g, rnd = seeded(Date.now() % 1e9 + idx);
-  qt = renew(qt, {g, mode: 'play', tick: 0, seenT: 0, idx, rnd, tiles: qtShuffle(QT_P[idx].flatMap((grp, k) => grp[1].map(w => ({w, k}))), rnd), sel: new Set(), cur: 0, found: [], mist: 0, tried: new Set(), shake: 0, flash: 0, msg: '', msgT: 0, hover: null, over: 0, won: false, reveal: 0});
+function qtNew(idx = qts.next, kind = 'suite') {
+  const g = qt?.g, rnd = seeded(Date.now() % 1e9 + idx), day = qtToday(), P = kind === 'jour' ? qtMix(qtDaySeed(day)) : kind === 'mix' ? qtMix(Math.floor(Math.random() * 1e9)) : QT_P[idx];
+  qt = renew(qt, {g, mode: 'play', tick: 0, seenT: 0, idx: kind === 'suite' ? idx : -1, kind, day, P, rnd, tiles: qtShuffle(P.flatMap((grp, k) => grp[1].map(w => ({w, k}))), rnd), sel: new Set(), cur: 0, found: [], mist: 0, tried: new Set(), shake: 0, flash: 0, msg: '', msgT: 0, hover: null, over: 0, won: false, reveal: 0});
   qtInfo();
 }
 // les cases : les groupes trouvés en bandes en haut, puis les mots qui restent, 4 par ligne
@@ -454,6 +497,12 @@ function qtCheck() {
 }
 function qtEnd(won) {
   qt.mode = 'over'; qt.won = won; qt.over = 0; qt.sel.clear(); qts.games++;
+  if (qt.kind !== 'suite') {  // la grille du jour compte une fois par jour, avec sa série de jours d'affilée ; les grilles surprises à part
+    if (qt.kind === 'mix') { qts.mix.played++; if (won) qts.mix.won++; }
+    else if (qts.day.last !== qt.day) { const D = qts.day, y = new Date(); y.setDate(y.getDate() - 1); const yd = y.getFullYear() + '-' + String(y.getMonth() + 1).padStart(2, '0') + '-' + String(y.getDate()).padStart(2, '0');
+      D.played++; if (won) D.won++; D.streak = won ? (D.lastWon === yd ? D.streak + 1 : 1) : 0; D.max = Math.max(D.max, D.streak); D.last = qt.day; D.res = won ? (qt.mist ? 'réussie' : 'sans faute') : 'ratée'; if (won) D.lastWon = qt.day; }
+    saveGames(); qtInfo(); if (won && !qtMute) setTimeout(() => [659, 784, 988, 1319].forEach((f, i) => setTimeout(() => qtBeep(f, .14), i * 90)), 200); return;
+  }
   if (won) { if (!qts.solved.includes(qt.idx)) qts.solved.push(qt.idx); if (!qt.mist) qts.perfect++; best('quatuor', qts.solved.length); }
   // la grille suivante : la première pas encore réussie après celle-ci, sinon la suivante tout court
   const n = QT_P.length, after = [...Array(n)].map((_, i) => (qt.idx + 1 + i) % n);
@@ -470,7 +519,7 @@ function qtUpdate() {
   }
 }
 function qtBand(g, k, row, flash) {
-  const [c, d] = QT_COL[k], y = QT.Y0 + row * (QT.TH + QT.GAP), x = QT.X0, w = 4 * QT.TW + 3 * QT.GAP, grp = QT_P[qt.idx][k];
+  const [c, d] = QT_COL[k], y = QT.Y0 + row * (QT.TH + QT.GAP), x = QT.X0, w = 4 * QT.TW + 3 * QT.GAP, grp = qt.P[k];
   px(g, '#05010b', x - 1, y - 1, w + 2, QT.TH + 2); px(g, c, x, y, w, QT.TH); px(g, '#ffffff', x, y, w, 1); px(g, d, x, y + QT.TH - 2, w, 2);
   PXK.fill(g, grp[0], x + w / 2, y + 11, '#120a18', 1, 'center');
   grp[1].forEach((wd, i) => PXK.fill(g, wd, x + QT.TW / 2 + i * (QT.TW + QT.GAP), y + 22, d, 1, 'center'));
@@ -495,24 +544,24 @@ function qtDraw() {
   const by = H - 22;
   if (qt.mode === 'over') {
     pxFont(g, qt.won ? (qt.mist ? 'BRAVO ! grille réussie' : 'SANS FAUTE ! grille réussie') : 'PERDU ! voici les groupes', W / 2, by - 4, qt.won ? '#7ee07a' : '#ff6a5a', 8, 'center');
-    if (qt.over > 60 && !qt.tiles.length) pxFont(g, 'Entrée : grille suivante', W / 2, by + 12, '#c0b8cc', 8, 'center');
+    if (qt.over > 60 && !qt.tiles.length) pxFont(g, qt.kind === 'mix' ? 'Entrée : autre surprise' : qt.kind === 'jour' ? 'Entrée : retour aux grilles' : 'Entrée : grille suivante', W / 2, by + 12, '#c0b8cc', 8, 'center');
   } else {
     if (qt.msgT) pxFont(g, qt.msg, W / 2, by - 4, qt.msg === 'À un près !' ? '#ffd84a' : '#ff8a7a', 8, 'center');
     else { pxFont(g, 'Erreurs permises', 70, by - 4, '#a898b8', 8); for (let i = 0; i < 4; i++) px(g, i < 4 - qt.mist ? '#ff4a6a' : '#3a2a46', 168 + i * 9, by - 11, 6, 6); }
     for (const [label, a, x] of QT_BTNS) { const hot = qt.hover === a, dis = a === 'go' && qt.sel.size !== 4; px(g, '#05010b', x - 1, by + 1, 78, 15); px(g, hot && !dis ? '#ffd84a' : '#3a3046', x, by + 2, 76, 13); px(g, '#62566e', x, by + 2, 76, 1); pxFont(g, label, x + 38, by + 12, hot && !dis ? '#1a1018' : dis ? '#7a6e88' : '#ffffff', 8, 'center'); }
   }
   px(g, '#0c0a14', 0, 0, W, HUD);
-  pxFont(g, 'Grille ' + (qt.idx + 1) + ' / ' + QT_P.length, 4, 9, '#ffffff', 8);
+  pxFont(g, qt.kind === 'jour' ? 'Grille du jour · ' + qt.day.slice(8) + '/' + qt.day.slice(5, 7) : qt.kind === 'mix' ? 'Grille surprise' : 'Grille ' + (qt.idx + 1) + ' / ' + QT_P.length, 4, 9, qt.kind === 'suite' ? '#ffffff' : '#ffd84a', 8);
   pxFont(g, qts.solved.length + ' réussie' + (qts.solved.length > 1 ? 's' : ''), W - 4, 9, '#a898b8', 8, 'right');
   if (qt.tick % 20 === 0) g.canvas.setAttribute('aria-label', 'Quatuor : grille ' + (qt.idx + 1) + ', ' + qt.found.length + ' groupes trouvés, ' + (4 - qt.mist) + ' erreurs permises' + (qt.mode === 'over' ? (qt.won ? ', grille réussie' : ', perdu') : '') + '. Mots : ' + qt.tiles.map(t => t.w).join(', ') + '.');
 }
 function qtInfo() {
-  $('qtStats').replaceChildren(...[['Grilles réussies', qts.solved.length + ' / ' + QT_P.length], ['Sans faute', qts.perfect], ['Parties', qts.games], ['Grille en cours', (qt ? qt.idx : qts.next) + 1]].flatMap(([a, b]) => [el('span', '', a), el('b', '', String(b))]));
+  $('qtStats').replaceChildren(...[['Grilles réussies', qts.solved.length + ' / ' + QT_P.length], ['Sans faute', qts.perfect], ['Parties', qts.games], ['Grille en cours', (qt && qt.idx >= 0 ? qt.idx : qts.next) + 1], ['Grille du jour', (qts.day.last === qtToday() ? qts.day.res : 'à faire') + ' · série ' + qts.day.streak + (qts.day.max > qts.day.streak ? ' (record ' + qts.day.max + ')' : '')], ['Grilles surprises', qts.mix.won + ' / ' + qts.mix.played]].flatMap(([a, b]) => [el('span', '', a), el('b', '', String(b))]));
 }
 document.addEventListener('keydown', e => {
   if (!view.classList.contains('on') || !qt || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   const k = e.key, n = qt.tiles.length, mv = {ArrowLeft: -1, ArrowRight: 1, ArrowUp: -4, ArrowDown: 4}[k];
-  if (qt.mode === 'over') { if ((k === 'Enter' || k === ' ') && qt.over > 60 && !qt.tiles.length) { e.preventDefault(); qtNew(); } return; }
+  if (qt.mode === 'over') { if ((k === 'Enter' || k === ' ') && qt.over > 60 && !qt.tiles.length) { e.preventDefault(); qt.kind === 'mix' ? qtNew(0, 'mix') : qtNew(); } return; }
   if (mv) { e.preventDefault(); if (qt.mode === 'pause') qt.mode = 'play'; const c = qt.cur + mv; if (c >= 0 && c < n) qt.cur = c; }
   else if (k === ' ') { e.preventDefault(); qtToggle(qt.cur); }
   else if (k === 'Enter') { e.preventDefault(); qtAct('go'); }
@@ -524,9 +573,19 @@ document.addEventListener('keydown', e => {
     const by = QT.H - 22; if (qt.mode !== 'over' && p.y >= by + 2 && p.y < by + 15) for (const [, a, x] of QT_BTNS) if (p.x >= x && p.x < x + 76) return a; return null; };
   cv.onpointermove = e => { if (qt) qt.hover = hit(at(e)); };
   cv.onpointerleave = () => { if (qt) qt.hover = null; };
-  cv.onpointerdown = e => { e.preventDefault(); if (!qt) return; if (qt.mode === 'over') { if (qt.over > 60 && !qt.tiles.length) qtNew(); return; } const h = hit(at(e)); if (typeof h === 'number') qtToggle(h); else if (h) qtAct(h); }; }
-$('qtNew').onclick = () => { qtNew(qt && qt.mode !== 'over' ? qt.idx : qts.next); $('qtNew').blur(); };
-$('qtCanvas').__qt = {go: i => qtNew(i)};
+  cv.onpointerdown = e => { e.preventDefault(); if (!qt) return; if (qt.mode === 'over') { if (qt.over > 60 && !qt.tiles.length) qt.kind === 'mix' ? qtNew(0, 'mix') : qtNew(); return; } const h = hit(at(e)); if (typeof h === 'number') qtToggle(h); else if (h) qtAct(h); }; }
+$('qtNew').onclick = () => { qtNew(qt && qt.mode !== 'over' && qt.idx >= 0 ? qt.idx : qts.next); $('qtNew').blur(); };
+$('qtDay').onclick = () => { qtNew(0, 'jour'); $('qtDay').blur(); };
+$('qtMix').onclick = () => { qtNew(0, 'mix'); $('qtMix').blur(); };
+function qtSelf() {  // vérification : la banque (mots de 10 lettres au plus), 200 grilles mélangées justes, la grille du jour la même toute la journée
+  const bad = [], all = QT_BANK.flat();
+  if (all.some(p => p[1].length !== 4 || p[1].some(w => [...w].length > 10))) bad.push('banque');
+  for (let i = 0; i < 200; i++) { const P = qtMix(i * 7919 + 1); if (new Set(P.flatMap(p => p[1])).size !== 16 || P.some((p, k) => !QT_BANK[k].includes(p))) { bad.push('mélange ' + i); break; } }
+  if (qtMix(qtDaySeed('2026-11-23')).map(p => p[0]).join() !== qtMix(qtDaySeed('2026-11-23')).map(p => p[0]).join() || qtMix(qtDaySeed('2026-11-23'))[0] === qtMix(qtDaySeed('2026-11-24'))[0] && qtMix(qtDaySeed('2026-11-23'))[3] === qtMix(qtDaySeed('2026-11-24'))[3]) bad.push('grille du jour');
+  return bad.length ? bad.join(', ') : 'ok';
+}
+{ const c = qtSelf(); console.assert(c === 'ok', 'quatuor', c); $('qtCanvas').dataset.selfcheck = c; }
+$('qtCanvas').__qt = {go: i => qtNew(i), st: () => qt, bank: QT_BANK};
 $('qtFs').onclick = () => { $('qtFs').blur(); try { document.fullscreenElement ? document.exitFullscreen() : $('qtCanvas').parentElement.requestFullscreen?.().catch(() => {}); } catch {} };
 {  // vérification : 80 grilles de 16 mots tous différents qui tiennent dans leur case, et une partie jouée (une erreur à un près, un groupe trouvé, une grille réussie)
   const bad = [];

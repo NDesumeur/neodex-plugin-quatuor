@@ -27,6 +27,18 @@ module.exports = async ({ pj, sleep }) => {
     for (let k = 0; k < 4; k++) { await key('Backspace'); await pickAll(G2.map(gr => gr[k])); await key('Enter'); await sleep(400); }
     await sleep(3200); await shot('4-perdu');
   }
+  // la grille du jour : quatre groupes de la banque, un par couleur ; trouvée, elle compte une fois avec sa série ; puis une grille surprise
+  if (await pj("document.getElementById('qtCanvas').dataset.selfcheck") !== 'ok') throw new Error('vérification : ' + await pj("document.getElementById('qtCanvas').dataset.selfcheck"));
+  const Q = code => pj('(() => { const T = document.getElementById("qtCanvas").__qt, qt = T.st(); ' + code + ' })()');
+  await pj("document.getElementById('qtDay').click(), 0"); await sleep(400);
+  const D = await Q('return qt.kind + "|" + qt.P.map(p => p[0]).join("/");'); if (!/^jour\|/.test(D)) throw new Error('grille du jour : ' + D);
+  if (await Q('return qt.P.every((p, k) => T.bank[k].includes(p));') !== true) throw new Error('grille du jour : couleurs');
+  const PD = await Q('return qt.P.map(p => p[1]);'); await sleep(200); await shot('6-jour');
+  for (let k = 0; k < 4; k++) { await key('Backspace'); await pickAll(PD[k]); await key('Enter'); await sleep(700); }
+  await sleep(1200); await shot('7-jour-reussie');
+  if (!/Grille du jour\W+(réussie|sans faute)\W+série\W+[1-9]/.test(await pj("document.getElementById('qtStats').textContent"))) throw new Error('grille du jour pas comptée : ' + await pj("document.getElementById('qtStats').textContent"));
+  await pj("document.getElementById('qtDay').click(), 0"); await sleep(300); if (await Q('return qt.P.map(p => p[0]).join("/");') !== D.split('|')[1]) throw new Error('la grille du jour change dans la journée');
+  await pj("document.getElementById('qtMix').click(), 0"); await sleep(300); if (await Q('return qt.kind + qt.tiles.length;') !== 'mix16') throw new Error('grille surprise'); await shot('8-surprise');
   // deux des nouvelles grilles (35 à 80) à l'écran, le plein écran et la place prise
   await pj(`window.__e = []; addEventListener('error', e => __e.push(e.message)); 0`);
   for (const i of [46, 79]) { await pj(`document.getElementById('qtCanvas').__qt.go(${i}), 0`); await sleep(400); const r = await read(); if (r.idx !== i || r.words.length !== 16) throw new Error('grille ' + (i + 1) + ' : ' + r.l); await shot('5-grille' + (i + 1)); }

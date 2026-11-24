@@ -6,6 +6,10 @@ A pixel art word game: sixteen words hide four groups of four. Find what links t
 
 **The grids are in French**: the words and the themes are French (the interface is translated).
 
+## Daily grid and surprise grids (new in 1.3.0)
+
+**Daily grid**: the same grid for everyone, new every day, with its streak of days solved in a row. **Surprise grid**: a fresh grid on every click, endlessly. These grids pick one group of each colour (yellow the easiest, purple the trickiest) from a bank of nearly 400 groups: those of the 80 grids plus 75 new ones (cheeses, volcanoes, Molière, « avoir la frite », palindromes, words hiding a number…). Two similar groups never land together.
+
 ## Controls
 
 - **Click** a word, or **arrows** then **Space**: pick or drop a word.
