@@ -1,7 +1,7 @@
 {
   "id": "neodex.quatuor",
   "name": "Quatuor",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": "NDesumeur",
   "description": "Jeu de mots : seize mots cachent quatre groupes de quatre. Trouve ce qui les relie, des fruits rouges aux mots qui suivent « coup de » en passant par les pays cachés dans un mot. Quatre-vingts grilles écrites à la main, avec des pièges : des mots qui semblent aller dans deux groupes. Quatre erreurs permises. Grilles réussies et sans faute. Plein écran et jeu à la taille de l'écran. Jeu de mots : seize mots cachent quatre groupes de quatre. Trouve ce qui les relie, des fruits rouges aux mots qui suivent « coup de » en passant par les pays cachés dans un mot. Quatre-vingts grilles écrites à la main avec des pièges, une grille du jour avec sa série, et des grilles surprises sans fin tirées d'une banque de près de 400 groupes, du jaune (simple) au violet (retors). Quatre erreurs permises. Plein écran et jeu à la taille de l'écran.",
   "icon": "icon.png",
@@ -22,5 +22,57 @@
   "sdk": "2.1.0",
   "permissions": [
     "storage"
+  ],
+  "succes": [
+    {
+      "id": "premier",
+      "nom": "Quatre par quatre",
+      "texte": "Réussir une première grille"
+    },
+    {
+      "id": "dix",
+      "nom": "Bon détective",
+      "texte": "Réussir 10 grilles différentes"
+    },
+    {
+      "id": "quarante",
+      "nom": "Fin limier",
+      "texte": "Réussir 40 grilles différentes"
+    },
+    {
+      "id": "toutes",
+      "nom": "Toutes les grilles",
+      "texte": "Réussir les 80 grilles",
+      "cache": true
+    },
+    {
+      "id": "parfait",
+      "nom": "Sans faute",
+      "texte": "Réussir une grille sans une erreur"
+    },
+    {
+      "id": "jour7",
+      "nom": "Une semaine de quatuors",
+      "texte": "Réussir la grille du jour 7 jours de suite"
+    },
+    {
+      "id": "melange",
+      "nom": "Grand mélange",
+      "texte": "Réussir 10 grilles mélangées"
+    }
+  ],
+  "records": [
+    {
+      "id": "reussies",
+      "nom": "Grilles réussies",
+      "sens": "haut",
+      "format": "nombre"
+    },
+    {
+      "id": "serie",
+      "nom": "Plus longue série de jours",
+      "sens": "haut",
+      "format": "nombre"
+    }
   ]
 }

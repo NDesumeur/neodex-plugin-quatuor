@@ -300,6 +300,9 @@ export default async function (ctx) {
   const best = (k, v) => { const b = games.best[k]; if (v > (b ?? 0)) {  // un score nul n'est jamais un record
     games.best[k] = v; saveGames(); return true; } return false; };
   const gstore = (k, init) => (games[k] ??= init);
+  // les trophées de NeoDex (3.4.8 et plus) : succès et records déclarés dans plugin.json ; sur un NeoDex plus ancien, rien ne se passe
+  const trophy = id => { ctx.games?.unlock(id).catch(() => {}); };
+  const trophyRecord = (id, v) => { if (v != null && Number.isFinite(+v)) ctx.games?.record(id, +v).catch(() => {}); };
 function gameLoop(st, appKey, update, draw) {
   cancelAnimationFrame(st.raf);
   const STEP = 1000 / 60; let acc = 0, last = performance.now();
@@ -556,6 +559,7 @@ function qtDraw() {
   if (qt.tick % 20 === 0) g.canvas.setAttribute('aria-label', 'Quatuor : grille ' + (qt.idx + 1) + ', ' + qt.found.length + ' groupes trouvés, ' + (4 - qt.mist) + ' erreurs permises' + (qt.mode === 'over' ? (qt.won ? ', grille réussie' : ', perdu') : '') + '. Mots : ' + qt.tiles.map(t => t.w).join(', ') + '.');
 }
 function qtInfo() {
+  setTimeout(qtTrophies);
   $('qtStats').replaceChildren(...[['Grilles réussies', qts.solved.length + ' / ' + QT_P.length], ['Sans faute', qts.perfect], ['Parties', qts.games], ['Grille en cours', (qt && qt.idx >= 0 ? qt.idx : qts.next) + 1], ['Grille du jour', (qts.day.last === qtToday() ? qts.day.res : 'à faire') + ' · série ' + qts.day.streak + (qts.day.max > qts.day.streak ? ' (record ' + qts.day.max + ')' : '')], ['Grilles surprises', qts.mix.won + ' / ' + qts.mix.played]].flatMap(([a, b]) => [el('span', '', a), el('b', '', String(b))]));
 }
 document.addEventListener('keydown', e => {
@@ -601,6 +605,13 @@ $('qtFs').onclick = () => { $('qtFs').blur(); try { document.fullscreenElement ?
   if (QT_P.length !== 80) bad.push(QT_P.length + ' grilles');
   console.assert(!bad.length, 'quatuor', bad);
   Object.assign(qts, JSON.parse(keepS)); if (keepB === undefined) delete games.best.quatuor; else games.best.quatuor = keepB; qt = keep; qtMute = false;
+}
+// les trophées, tirés des statistiques et des records gardés (aussi à l'ouverture : ce qui a été fait avant compte)
+function qtTrophies() {
+  const n = qts.solved.length, sig = [n, qts.perfect, qts.day.max, qts.mix.won].join(); if (sig === qtTrophies.sig) return; qtTrophies.sig = sig;
+  trophyRecord('reussies', n || null); trophyRecord('serie', qts.day.max || null);
+  if (n >= 1 || qts.day.won || qts.mix.won) trophy('premier'); if (n >= 10) trophy('dix'); if (n >= 40) trophy('quarante'); if (n >= QT_P.length) trophy('toutes');
+  if (qts.perfect >= 1) trophy('parfait'); if (qts.day.max >= 7) trophy('jour7'); if (qts.mix.won >= 10) trophy('melange');
 }
 ctx.onOpen(() => {
   if (!qt || !qt.g) { qtNew(); qt.g = $('qtCanvas').getContext('2d'); }
